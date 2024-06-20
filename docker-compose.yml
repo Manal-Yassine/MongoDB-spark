@@ -1,0 +1,38 @@
+version: '3.3'
+services:
+  mongodb:
+    image: mongo:4.4
+    container_name: mongodb
+    ports:
+      - "27021:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  spark:
+    image: bitnami/spark:3.1.2
+    container_name: spark
+    environment:
+      - SPARK_MODE=master
+      - SPARK_MASTER_HOST=spark
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=512m
+      - SPARK_DRIVER_MEMORY=512m
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    depends_on:
+      - mongodb
+
+  python:
+    image: python:3.9
+    container_name: python
+    volumes:
+      - .:/app
+    working_dir: /app
+      sh -c "pip install -r requirements.txt && python Run_Mongo.py"
+    depends_on:
+      - mongodb
+     
+volumes:
+  mongo-data:
+
